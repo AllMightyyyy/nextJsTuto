@@ -4,6 +4,7 @@ import { redirect } from '@/node_modules/next/navigation';
 import { z } from 'zod';
 import { sql } from '@/node_modules/@vercel/postgres/dist/index.cjs';
 import { signIn } from '@/auth';
+import { AuthError } from 'next-auth';
 
 const FormSchema = z.object({
     id: z.string(),
@@ -111,17 +112,17 @@ export async function deleteInvoice(id: string) {
 }
 
 export async function authenticate(
-  prevState: string | undefined, 
+  prevState: string | undefined,
   formData: FormData,
 ) {
   try {
     await signIn('credentials', formData);
   } catch (error) {
     if (error instanceof AuthError) {
-      switch (error) {
+      switch (error.type) {
         case 'CredentialsSignin':
           return 'Invalid credentials.';
-        default: 
+        default:
           return 'Something went wrong.';
       }
     }
